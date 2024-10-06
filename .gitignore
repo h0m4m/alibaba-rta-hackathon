@@ -1,0 +1,67 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# FastAPI specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+*.sql
+*.env
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Node modules (for React)
+node_modules/
+
+# React build files
+build/
+dist/
+*.map
+
+# Logs
+logs/
+*.log
+
+# macOS
+.DS_Store
+
+# Coverage reports
+htmlcov/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Static and media files (for FastAPI)
+static/
+media/
+
+# MySQL dump files
+*.sql
+
+# Other unneeded files
+*.swp
+*.swo
+
+# NPM debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# Testing outputs
+coverage/
+*.pytest_cache
