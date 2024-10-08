@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
-# Database setu
+# Database setup
 DATABASE_URL = "postgresql://alibabapost:Alibabapost123@polardb-endpoint.rwlb.rds.aliyuncs.com:5432/alibabapost123"
 
 engine = create_engine(DATABASE_URL)
@@ -57,12 +57,6 @@ class BusyPoint(Base):
     max_drivers = Column(Integer, nullable=False)
     current_drivers = Column(Integer, nullable=False)
     assigned_drivers = Column(String)  # Comma-separated driver IDs
-
-
-class UserLogin(BaseModel):
-    username: str
-    password: str
-
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
@@ -117,15 +111,10 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Signup successful"}
 
 @app.post("/login")
-async def login(user: UserLogin, db: Session = Depends(get_db)):
-    # Query the database for the user with given username and password
+async def login(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username, User.password == user.password).first()
-    
-    # If user does not exist, raise an HTTP exception
     if not db_user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
-    
-    # If the user is found, return success with user details
     return {
         "message": "Login successful",
         "first_name": db_user.first_name,
