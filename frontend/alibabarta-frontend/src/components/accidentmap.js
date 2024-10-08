@@ -1,9 +1,8 @@
-// AccidentMap.js
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-const RADIUS_KM = 2; // Define the radius in kilometers within which to consider a hotspot as 'close'
+const RADIUS_KM = 2; // Define the radius in kilometers to consider the point as served by a driver
 
 const LocateUser = ({ onLocationUpdate }) => {
   const map = useMap();
@@ -26,13 +25,28 @@ const LocateUser = ({ onLocationUpdate }) => {
 
 const AccidentMap = ({ onHotspotsNearbyChange }) => {
   const [accidentData, setAccidentData] = useState([]);
+  const [busyPoints, setBusyPoints] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
+  const driverId = "driver_1"; // Unique ID for the current driver. In a real-world app, this would be fetched dynamically.
 
   // Fetch accident data from the FastAPI backend
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/accident-hotspots')
       .then((response) => response.json())
-      .then((data) => setAccidentData(data));
+      .then((data) => {
+        setAccidentData(data);
+        console.log("Accident data:", data);
+      });
+  }, []);
+
+  // Fetch busy points from the FastAPI backend
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/busy-points')
+      .then((response) => response.json())
+      .then((data) => {
+        setBusyPoints(data);
+        console.log("Busy points fetched:", data);
+      });
   }, []);
 
   // Function to calculate distance between two coordinates using Haversine formula
@@ -54,20 +68,41 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
     return R * c; // Distance in kilometers
   };
 
-  // Update user location and count hotspots nearby
+  // Update user location and check if they are near a busy point
   useEffect(() => {
-    if (userLocation && accidentData.length > 0) {
-      const nearbyCount = accidentData.filter((hotspot) => {
+    if (userLocation && busyPoints.length > 0) {
+      busyPoints.forEach((point) => {
         const distance = haversineDistance(userLocation, {
-          lat: hotspot.lat,
-          lng: hotspot.lng,
+          lat: point.lat,
+          lng: point.lng,
         });
-        return distance <= RADIUS_KM;
-      }).length;
 
-      onHotspotsNearbyChange(nearbyCount);
+        if (distance <= RADIUS_KM) {
+          // Call the update busy point endpoint if within the 2 km radius
+          fetch('http://127.0.0.1:8000/api/update-busy-point', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ lat: point.lat, lng: point.lng, driver_id: driverId }), // Send driver_id as part of the request
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data.message);
+              if (data.message === "Driver assigned successfully") {
+                // Only update busy points if the driver assignment was successful
+                fetch('http://127.0.0.1:8000/api/busy-points')
+                  .then((response) => response.json())
+                  .then((updatedData) => {
+                    setBusyPoints(updatedData);
+                    console.log("Updated busy points:", updatedData);
+                  });
+              }
+            });
+        }
+      });
     }
-  }, [userLocation, accidentData, onHotspotsNearbyChange]);
+  }, [userLocation, busyPoints]);
 
   return (
     <MapContainer center={[25.3463, 55.4209]} zoom={12} style={{ height: '500px', width: '100%' }}>
@@ -83,7 +118,7 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
           position={[userLocation.lat, userLocation.lng]}
           icon={L.icon({
             iconUrl: require('leaflet/dist/images/marker-icon.png'),
-            iconSize: [25, 25],
+            iconSize: [30, 45],
             iconAnchor: [15, 45],
             popupAnchor: [0, -40],
           })}
@@ -98,8 +133,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
           key={index}
           position={[hotspot.lat, hotspot.lng]}
           icon={L.icon({
-            iconUrl: hotspot.intensity > 5 ? `${process.env.PUBLIC_URL}/icons/redmarker.png` : `${process.env.PUBLIC_URL}/icons/yellowmarker.png`,
-            iconSize: [35, 35],
+            iconUrl: hotspot.intensity > 5 ? `${process.env.PUBLIC_URL}/red_marker.png` : `${process.env.PUBLIC_URL}/yellow_marker.png`,
+            iconSize: [25, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
           })}
@@ -108,6 +143,29 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
             <div>
               <p><strong>Intensity:</strong> {hotspot.intensity}</p>
               <p>{hotspot.description}</p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+
+      {/* Display Busy Points */}
+      {busyPoints.map((point, index) => (
+        <Marker
+          key={index}
+          position={[point.lat, point.lng]}
+          icon={L.icon({
+            iconUrl: `${process.env.PUBLIC_URL}/blue_marker.png`,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+          })}
+        >
+          <Popup>
+            <div>
+              <p><strong>Busy Point</strong></p>
+              <p>Weekday: {point.weekday}</p>
+              <p>Time Interval: {point.time_interval}</p>
+              <p>Drivers Needed: {point.max_drivers - point.current_drivers}</p>
             </div>
           </Popup>
         </Marker>
