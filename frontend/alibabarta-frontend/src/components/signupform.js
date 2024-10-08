@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-
-
 const SignupForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [role, setRole] = useState('customer');  // Default role to 'customer'
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
@@ -20,6 +19,7 @@ const SignupForm = () => {
         password,
         first_name: firstName,
         last_name: lastName,
+        role,  // Add the role to the request payload
       });
       navigate('/dashboard');
     } catch (error) {
@@ -67,6 +67,17 @@ const SignupForm = () => {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-primary focus:border-primary"
             />
+          </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium text-gray-700">Role:</label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-primary focus:border-primary"
+            >
+              <option value="customer">Customer</option>
+              <option value="driver">Driver</option>
+            </select>
           </div>
           <button
             type="submit"

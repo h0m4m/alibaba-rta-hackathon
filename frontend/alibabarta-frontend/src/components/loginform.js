@@ -17,7 +17,13 @@ const LoginForm = ({ onLogin }) => {
       setMessage(response.data.message);
       onLogin(response.data.first_name, response.data.last_name);
     } catch (error) {
-      setMessage(error.response?.data?.detail || 'Login failed');
+      if (error.response && error.response.data && typeof error.response.data.detail === 'string') {
+        setMessage(error.response.data.detail);
+      } else if (error.response && error.response.data && Array.isArray(error.response.data.detail)) {
+        setMessage(error.response.data.detail.map((err) => err.msg).join(', '));
+      } else {
+        setMessage('Login failed');
+      }
     }
   };
 
