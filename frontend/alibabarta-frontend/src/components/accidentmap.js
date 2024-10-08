@@ -133,8 +133,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
           key={index}
           position={[hotspot.lat, hotspot.lng]}
           icon={L.icon({
-            iconUrl: hotspot.intensity > 5 ? `${process.env.PUBLIC_URL}/red_marker.png` : `${process.env.PUBLIC_URL}/yellow_marker.png`,
-            iconSize: [25, 41],
+            iconUrl: hotspot.intensity > 5 ? `${process.env.PUBLIC_URL}/icons/redaccidentmarker.png` : `${process.env.PUBLIC_URL}/icons/yellowaccidentmarker.png`,
+            iconSize: [41, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
           })}
@@ -154,8 +154,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
           key={index}
           position={[point.lat, point.lng]}
           icon={L.icon({
-            iconUrl: `${process.env.PUBLIC_URL}/blue_marker.png`,
-            iconSize: [25, 41],
+            iconUrl: `${process.env.PUBLIC_URL}/icons/busypointmarker.png`,
+            iconSize: [41, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
           })}
