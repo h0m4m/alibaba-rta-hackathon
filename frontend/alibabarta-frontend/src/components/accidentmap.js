@@ -73,8 +73,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
     if (userLocation && busyPoints.length > 0) {
       busyPoints.forEach((point) => {
         const distance = haversineDistance(userLocation, {
-          lat: point.lat,
-          lng: point.lng,
+          lat: point.start_lat,
+          lng: point.start_lon,
         });
 
         if (distance <= RADIUS_KM) {
@@ -84,7 +84,7 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ lat: point.lat, lng: point.lng, driver_id: driverId }), // Send driver_id as part of the request
+            body: JSON.stringify({ start_lat: point.start_lat, start_lon: point.start_lon, driver_id: driverId }), // Send driver_id as part of the request
           })
             .then((response) => response.json())
             .then((data) => {
@@ -131,9 +131,9 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
       {accidentData.map((hotspot, index) => (
         <Marker
           key={index}
-          position={[hotspot.lat, hotspot.lng]}
+          position={[hotspot.acci_x, hotspot.acci_y]}
           icon={L.icon({
-            iconUrl: hotspot.intensity > 5 ? `${process.env.PUBLIC_URL}/icons/redaccidentmarker.png` : `${process.env.PUBLIC_URL}/icons/yellowaccidentmarker.png`,
+            iconUrl: `${process.env.PUBLIC_URL}/icons/redaccidentmarker.png`,
             iconSize: [41, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
@@ -141,8 +141,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
         >
           <Popup>
             <div>
-              <p><strong>Intensity:</strong> {hotspot.intensity}</p>
-              <p>{hotspot.description}</p>
+              <p><strong>Accident Hotspot</strong></p>
+              <p>Hour: {hotspot.hour}:00 - {hotspot.hour + 1}:00</p>
             </div>
           </Popup>
         </Marker>
@@ -152,7 +152,7 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
       {busyPoints.map((point, index) => (
         <Marker
           key={index}
-          position={[point.lat, point.lng]}
+          position={[point.start_lat, point.start_lon]}
           icon={L.icon({
             iconUrl: `${process.env.PUBLIC_URL}/icons/busypointmarker.png`,
             iconSize: [41, 41],
@@ -163,9 +163,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
           <Popup>
             <div>
               <p><strong>Busy Point</strong></p>
-              <p>Weekday: {point.weekday}</p>
-              <p>Time Interval: {point.time_interval}</p>
-              <p>Drivers Needed: {point.max_drivers - point.current_drivers}</p>
+              <p>Weekday: {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][point.weekday - 1]}</p>
+              <p>Hour: {point.hour}:00 - {point.hour + 1}:00</p>
             </div>
           </Popup>
         </Marker>

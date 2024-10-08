@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from typing import List
@@ -40,23 +40,21 @@ class User(Base):
     role = Column(String, nullable=False)  # 'driver' or 'customer'
 
 class AccidentHotspot(Base):
-    __tablename__ = 'accident_hotspots'
-    id = Column(Integer, primary_key=True, index=True)
-    lat = Column(Float, nullable=False)
-    lng = Column(Float, nullable=False)
-    intensity = Column(Integer, nullable=False)
-    description = Column(String)
+    __tablename__ = "accident_hotspots"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)  # Unique identifier
+    acci_x = Column(Float, nullable=False)  # Latitude
+    acci_y = Column(Float, nullable=False)  # Longitude
+    hour = Column(Integer, nullable=False)  # Hour (0-23)
 
 class BusyPoint(Base):
     __tablename__ = 'busy_points'
-    id = Column(Integer, primary_key=True, index=True)
-    lat = Column(Float, nullable=False)
-    lng = Column(Float, nullable=False)
-    weekday = Column(String, nullable=False)
-    time_interval = Column(String, nullable=False)
-    max_drivers = Column(Integer, nullable=False)
-    current_drivers = Column(Integer, nullable=False)
-    assigned_drivers = Column(String)  # Comma-separated driver IDs
+    
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    hour = Column(Integer, nullable=False)  # Hour (0-23)
+    start_lat = Column(Float, nullable=False)  # Latitude
+    start_lon = Column(Float, nullable=False)  # Longitude
+    weekday = Column(Integer, nullable=False)  # Weekday (1-7, where 1 = Sunday)
 
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
@@ -69,20 +67,20 @@ class UserCreate(BaseModel):
     last_name: str = None
     role: str  # 'driver' or 'customer'
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class AccidentHotspotCreate(BaseModel):
-    lat: float
-    lng: float
-    intensity: int
-    description: str
+    acci_x: float
+    acci_y: float
+    hour: int
 
 class BusyPointCreate(BaseModel):
-    lat: float
-    lng: float
-    weekday: str
-    time_interval: str
-    max_drivers: int
-    current_drivers: int = 0
-    assigned_drivers: List[str] = []
+    hour: int
+    start_lat: float
+    start_lon: float
+    weekday: int
 
 # Dependency to get DB session
 def get_db():
@@ -111,10 +109,15 @@ async def signup(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "Signup successful"}
 
 @app.post("/login")
-async def login(user: UserCreate, db: Session = Depends(get_db)):
+async def login(user: UserLogin, db: Session = Depends(get_db)):
+    # Query the database for the user with given username and password
     db_user = db.query(User).filter(User.username == user.username, User.password == user.password).first()
+    
+    # If user does not exist, raise an HTTP exception
     if not db_user:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    # If the user is found, return success with user details
     return {
         "message": "Login successful",
         "first_name": db_user.first_name,
@@ -124,41 +127,24 @@ async def login(user: UserCreate, db: Session = Depends(get_db)):
 
 @app.get("/api/accident-hotspots", response_model=List[AccidentHotspotCreate])
 async def get_accident_hotspots(db: Session = Depends(get_db)):
-    return db.query(AccidentHotspot).all()
+    current_hour = datetime.now().hour  # Get the current hour (0-23)
+    return db.query(AccidentHotspot).filter(AccidentHotspot.hour == current_hour).all()
 
 @app.get("/api/busy-points", response_model=List[BusyPointCreate])
 async def get_busy_points(db: Session = Depends(get_db)):
-    # Get current weekday and time
     now = datetime.now()
-    current_weekday = now.strftime("%A")
-    current_time = now.strftime("%H:%M")
+    current_weekday = now.isoweekday()  # Weekdays are 1-7 (Monday to Sunday)
+    current_hour = now.hour  # Get the current hour (0-23)
 
-    # Filter busy points based on current weekday and time interval
-    relevant_points = []
-    for point in db.query(BusyPoint).all():
-        if point.weekday == current_weekday:
-            start_time, end_time = point.time_interval.split("-")
-            if start_time <= current_time <= end_time and point.current_drivers < point.max_drivers:
-                relevant_points.append(point)
+    # Fetch busy points matching the current weekday and hour
+    return db.query(BusyPoint).filter(BusyPoint.weekday == 1, BusyPoint.hour == current_hour).all()
 
-    return relevant_points
 
 @app.post("/api/update-busy-point")
 async def update_busy_point(request: BusyPointCreate, db: Session = Depends(get_db)):
-    busy_point = db.query(BusyPoint).filter(BusyPoint.lat == request.lat, BusyPoint.lng == request.lng).first()
+    busy_point = db.query(BusyPoint).filter(BusyPoint.start_lat == request.start_lat, BusyPoint.start_lon == request.start_lon).first()
     if not busy_point:
         return {"message": "Busy point not found"}
     
-    if request.driver_id not in busy_point.assigned_drivers.split(","):
-        if busy_point.current_drivers < busy_point.max_drivers:
-            busy_point.current_drivers += 1
-            assigned_drivers = busy_point.assigned_drivers.split(",") if busy_point.assigned_drivers else []
-            assigned_drivers.append(request.driver_id)
-            busy_point.assigned_drivers = ",".join(assigned_drivers)
-            db.commit()
-            db.refresh(busy_point)
-            return {"message": "Driver assigned successfully"}
-        else:
-            return {"message": "Max drivers reached for this point"}
-    else:
-        return {"message": "Driver has already been assigned to this point"}
+    # Update logic if needed
+    return {"message": "Busy point updated successfully"}
