@@ -34,5 +34,5 @@ def import_busy_points_data(csv_file_path):
         session.close()
 
 # Call these functions with the paths to your CSV files
-import_hotspot_data('path/to/accident_hotspots.csv')
-import_busy_points_data('path/to/busy_points.csv')
+import_hotspot_data('C:/Users/mhdho/Desktop/alibaba-rta-hackathon/ML-Clustering/accidents_hotspots.csv')
+import_busy_points_data('C:/Users/mhdho/Desktop/alibaba-rta-hackathon/ML-Clustering/high_demand_areas_reduced.csv')
