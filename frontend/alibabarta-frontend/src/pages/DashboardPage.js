@@ -27,7 +27,7 @@ const DashboardPage = ({ user, onLogout }) => {
         <div className="w-full p-6 bg-white rounded-lg shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl font-bold text-primary">
-              Accident Hotspots ({nearbyHotspots} nearby)
+              AI SmartMap
             </h3>
           </div>
           <AccidentMap onHotspotsNearbyChange={(count) => setNearbyHotspots(count)} /> {/* Pass the nearby count update function */}

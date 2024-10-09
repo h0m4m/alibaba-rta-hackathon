@@ -26,8 +26,8 @@ const LocateUser = ({ onLocationUpdate }) => {
 const AccidentMap = ({ onHotspotsNearbyChange }) => {
   const [accidentData, setAccidentData] = useState([]);
   const [busyPoints, setBusyPoints] = useState([]);
+  const [taxiStands, setTaxiStands] = useState([]);
   const [userLocation, setUserLocation] = useState(null);
-  const driverId = "driver_1"; // Unique ID for the current driver. In a real-world app, this would be fetched dynamically.
 
   // Fetch accident data from the FastAPI backend
   useEffect(() => {
@@ -36,7 +36,8 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
       .then((data) => {
         setAccidentData(data);
         console.log("Accident data:", data);
-      });
+      })
+      .catch((error) => console.error('Error fetching accident hotspots:', error));
   }, []);
 
   // Fetch busy points from the FastAPI backend
@@ -46,7 +47,19 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
       .then((data) => {
         setBusyPoints(data);
         console.log("Busy points fetched:", data);
-      });
+      })
+      .catch((error) => console.error('Error fetching busy points:', error));
+  }, []);
+
+  // Fetch taxi stands from the FastAPI backend
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/taxi-stands')
+      .then((response) => response.json())
+      .then((data) => {
+        setTaxiStands(data);
+        console.log("Taxi stands fetched:", data);
+      })
+      .catch((error) => console.error('Error fetching taxi stands:', error));
   }, []);
 
   // Function to calculate distance between two coordinates using Haversine formula
@@ -67,42 +80,6 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
 
     return R * c; // Distance in kilometers
   };
-
-  // Update user location and check if they are near a busy point
-  useEffect(() => {
-    if (userLocation && busyPoints.length > 0) {
-      busyPoints.forEach((point) => {
-        const distance = haversineDistance(userLocation, {
-          lat: point.start_lat,
-          lng: point.start_lon,
-        });
-
-        if (distance <= RADIUS_KM) {
-          // Call the update busy point endpoint if within the 2 km radius
-          fetch('http://127.0.0.1:8000/api/update-busy-point', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ start_lat: point.start_lat, start_lon: point.start_lon, driver_id: driverId }), // Send driver_id as part of the request
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              console.log(data.message);
-              if (data.message === "Driver assigned successfully") {
-                // Only update busy points if the driver assignment was successful
-                fetch('http://127.0.0.1:8000/api/busy-points')
-                  .then((response) => response.json())
-                  .then((updatedData) => {
-                    setBusyPoints(updatedData);
-                    console.log("Updated busy points:", updatedData);
-                  });
-              }
-            });
-        }
-      });
-    }
-  }, [userLocation, busyPoints]);
 
   return (
     <MapContainer center={[25.3463, 55.4209]} zoom={12} style={{ height: '500px', width: '100%' }}>
@@ -133,7 +110,7 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
           key={index}
           position={[hotspot.acci_x, hotspot.acci_y]}
           icon={L.icon({
-            iconUrl: `${process.env.PUBLIC_URL}/icons/redaccidentmarker.png`,
+            iconUrl: `${process.env.PUBLIC_URL}/icons/accidentmarker.png`,
             iconSize: [41, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
@@ -165,6 +142,27 @@ const AccidentMap = ({ onHotspotsNearbyChange }) => {
               <p><strong>Busy Point</strong></p>
               <p>Weekday: {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][point.weekday - 1]}</p>
               <p>Hour: {point.hour}:00 - {point.hour + 1}:00</p>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+
+      {/* Display Taxi Stands */}
+      {taxiStands.map((stand, index) => (
+        <Marker
+          key={index}
+          position={[stand.location_latitude, stand.location_longitude]}
+          icon={L.icon({
+            iconUrl: `${process.env.PUBLIC_URL}/icons/taxistand.png`,
+            iconSize: [41, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+          })}
+        >
+          <Popup>
+            <div>
+              <p><strong>Taxi Stand</strong></p>
+              <p>Location: {stand.location_name}</p>
             </div>
           </Popup>
         </Marker>

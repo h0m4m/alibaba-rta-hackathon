@@ -1,38 +1,21 @@
 import csv
 from sqlalchemy.orm import Session
-from main import AccidentHotspot, BusyPoint, engine
+from main import TaxiStand, engine  # Assuming the TaxiStand model is in the main.py file
 
-# Load accident hotspots data into the database from CSV
-def import_hotspot_data(csv_file_path):
-    with open(csv_file_path, newline='') as csvfile:
+# Load taxi stands data into the database from CSV
+def import_taxi_stands_data(csv_file_path):
+    with open(csv_file_path, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         session = Session(bind=engine)
         for row in reader:
-            hotspot = AccidentHotspot(
-                acci_x=float(row['acci_x']),
-                acci_y=float(row['acci_y']),
-                hour=int(row['hour'])
+            taxi_stand = TaxiStand(
+                location_name=row['location_name'],
+                location_longitude=float(row['location_longitude']),
+                location_latitude=float(row['location_latitude'])
             )
-            session.add(hotspot)
+            session.add(taxi_stand)
         session.commit()
         session.close()
 
-# Load busy points data into the database from CSV
-def import_busy_points_data(csv_file_path):
-    with open(csv_file_path, newline='') as csvfile:
-        reader = csv.DictReader(csvfile)
-        session = Session(bind=engine)
-        for row in reader:
-            busy_point = BusyPoint(
-                hour=int(row['hour']),
-                start_lat=float(row['StartLat']),
-                start_lon=float(row['StartLon']),
-                weekday=int(row['weekday'])
-            )
-            session.add(busy_point)
-        session.commit()
-        session.close()
-
-# Call these functions with the paths to your CSV files
-import_hotspot_data('C:/Users/mhdho/Desktop/alibaba-rta-hackathon/ML-Clustering/accidents_hotspots.csv')
-import_busy_points_data('C:/Users/mhdho/Desktop/alibaba-rta-hackathon/ML-Clustering/high_demand_areas_reduced.csv')
+# Call this function with the path to your CSV file
+import_taxi_stands_data('C:/Users/mhdho/Desktop/alibaba-rta-hackathon/ML-Clustering/Taxi_Stand_Locations.csv')
