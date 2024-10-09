@@ -56,6 +56,14 @@ class BusyPoint(Base):
     start_lon = Column(Float, nullable=False)  # Longitude
     weekday = Column(Integer, nullable=False)  # Weekday (1-7, where 1 = Sunday)
 
+class TaxiStand(Base):
+    __tablename__ = "taxi_stands"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    location_name = Column(String, nullable=False)
+    location_longitude = Column(Float, nullable=False)
+    location_latitude = Column(Float, nullable=False)
+
 # Create tables in the database
 Base.metadata.create_all(bind=engine)
 
@@ -81,6 +89,11 @@ class BusyPointCreate(BaseModel):
     start_lat: float
     start_lon: float
     weekday: int
+
+class TaxiStandCreate(BaseModel):
+    location_name: str
+    location_longitude: float
+    location_latitude: float
 
 # Dependency to get DB session
 def get_db():
@@ -139,12 +152,20 @@ async def get_busy_points(db: Session = Depends(get_db)):
     # Fetch busy points matching the current weekday and hour
     return db.query(BusyPoint).filter(BusyPoint.weekday == 1, BusyPoint.hour == current_hour).all()
 
+@app.get("/api/taxi-stands", response_model=List[TaxiStandCreate])
+async def get_taxi_stands(db: Session = Depends(get_db)):
+    # Return all taxi stands
+    return db.query(TaxiStand).all()
 
-@app.post("/api/update-busy-point")
-async def update_busy_point(request: BusyPointCreate, db: Session = Depends(get_db)):
-    busy_point = db.query(BusyPoint).filter(BusyPoint.start_lat == request.start_lat, BusyPoint.start_lon == request.start_lon).first()
-    if not busy_point:
-        return {"message": "Busy point not found"}
-    
-    # Update logic if needed
-    return {"message": "Busy point updated successfully"}
+@app.post("/api/taxi-stands")
+async def add_taxi_stand(stand: TaxiStandCreate, db: Session = Depends(get_db)):
+    new_stand = TaxiStand(
+        location_name=stand.location_name,
+        location_longitude=stand.location_longitude,
+        location_latitude=stand.location_latitude
+    )
+    db.add(new_stand)
+    db.commit()
+    db.refresh(new_stand)
+    return {"message": "Taxi Stand added successfully"}
+
