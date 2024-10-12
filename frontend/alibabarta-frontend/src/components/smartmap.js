@@ -15,7 +15,7 @@ const containerStyle = {
   height: '500px',
 };
 
-const SmartMap = ({ filterSettings, onHotspotsNearbyChange }) => {
+const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyChange, navigateToHighDemand }) => {
   const [accidentData, setAccidentData] = useState([]);
   const [busyPoints, setBusyPoints] = useState([]);
   const [taxiStands, setTaxiStands] = useState([]);
@@ -96,6 +96,39 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange }) => {
     }
   }, [userLocation, accidentData, onHotspotsNearbyChange]);
 
+  // Check if any high-demand areas are nearby
+  useEffect(() => {
+    if (userLocation && busyPoints.length > 0) {
+      let closestPoint = null;
+      let minDistance = Infinity;
+
+      busyPoints.forEach((point) => {
+        const distance = haversineDistance(userLocation, {
+          lat: point.start_lat,
+          lng: point.start_lon,
+        });
+
+        if (distance <= RADIUS_KM && distance < minDistance) {
+          closestPoint = point;
+          minDistance = distance;
+        }
+      });
+
+      onHighDemandNearbyChange(closestPoint);
+    }
+  }, [userLocation, busyPoints, onHighDemandNearbyChange]);
+
+  // Handle navigation to high-demand point
+  useEffect(() => {
+    if (navigateToHighDemand) {
+      setDirectionsResponse({
+        origin: userLocation,
+        destination: { lat: navigateToHighDemand.start_lat, lng: navigateToHighDemand.start_lon },
+        travelMode: 'DRIVING',
+      });
+    }
+  }, [navigateToHighDemand, userLocation]);
+
   return isLoaded ? (
     <GoogleMap
       mapContainerStyle={containerStyle}
@@ -107,7 +140,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange }) => {
         <Marker
           position={userLocation}
           icon={{
-            url: '/icons/user-location.png', // You can create a distinct icon for the user's current location
+            url: '/icons/user-location.png',
             scaledSize: new window.google.maps.Size(45, 45),
           }}
           onClick={() => setSelectedLocation({ type: 'user' })}
@@ -167,32 +200,6 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange }) => {
             }
           />
         ))}
-
-      {/* InfoWindow for Selected Location */}
-      {selectedLocation && (
-        <InfoWindow
-          position={
-            selectedLocation.type === 'user'
-              ? userLocation
-              : selectedLocation.type === 'accident'
-              ? { lat: selectedLocation.data.acci_x, lng: selectedLocation.data.acci_y }
-              : selectedLocation.type === 'busy'
-              ? { lat: selectedLocation.data.start_lat, lng: selectedLocation.data.start_lon }
-              : { lat: selectedLocation.data.location_latitude, lng: selectedLocation.data.location_longitude }
-          }
-          onCloseClick={() => setSelectedLocation(null)}
-        >
-          <div>
-            {selectedLocation.type === 'user' && <p><strong>You are here</strong></p>}
-            {selectedLocation.type === 'accident' && (
-              <>
-                <p><strong>Accident Hotspot</strong></p>
-                <p>Hour: {selectedLocation.data.hour}:00 - {selectedLocation.data.hour + 1}:00</p>
-              </>
-            )}
-          </div>
-        </InfoWindow>
-      )}
 
       {/* Render Directions */}
       {directionsResponse && (
