@@ -1,16 +1,16 @@
 import pandas as pd
 from sklearn.cluster import KMeans
 
-data = pd.read_csv('Traffic_Incidents.csv')
+data2 = pd.read_csv('Traffic_Incidents.csv')
 
 # Convert 'acci_time' to datetime to extract the hour
-data['acci_time'] = pd.to_datetime(data['acci_time'], format='%d/%m/%Y %H:%M:%S')
-data['hour'] = data['acci_time'].dt.hour
+data2['acci_time'] = pd.to_datetime(data2['acci_time'], format='%d/%m/%Y %H:%M:%S')
+data2['hour'] = data2['acci_time'].dt.hour
 
 clustered_data_list = []
 
-for hour in data['hour'].unique():
-    hourly_data = data[data['hour'] == hour]
+for hour in data2['hour'].unique():
+    hourly_data = data2[data2['hour'] == hour]
     X = hourly_data[['acci_x', 'acci_y']]
 
     # Apply KMeans clustering for each hour
