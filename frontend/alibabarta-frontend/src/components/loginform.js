@@ -15,7 +15,12 @@ const LoginForm = ({ onLogin }) => {
         password,
       });
       setMessage(response.data.message);
-      onLogin(response.data.first_name, response.data.last_name);
+      
+      const { first_name, last_name } = response.data;
+      localStorage.setItem('user', JSON.stringify({ firstName: first_name, lastName: last_name }));
+      localStorage.setItem('isAuthenticated', 'true');
+
+      onLogin(first_name, last_name);
     } catch (error) {
       if (error.response && error.response.data && typeof error.response.data.detail === 'string') {
         setMessage(error.response.data.detail);

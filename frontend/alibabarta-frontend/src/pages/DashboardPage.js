@@ -1,9 +1,10 @@
-// DashboardPage.js
 import React, { useState } from 'react';
 import SmartMap from '../components/smartmap'; // Import the SmartMap component
 
 const DashboardPage = ({ user, onLogout }) => {
-  const [nearbyHotspots, setNearbyHotspots] = useState(false); // Boolean to track if there are nearby hotspots
+  const [nearbyHotspots, setNearbyHotspots] = useState(false);
+  const [highDemandPoint, setHighDemandPoint] = useState(null);
+  const [navigateToHighDemand, setNavigateToHighDemand] = useState(null);
   const [filterSettings, setFilterSettings] = useState({
     showAccidentHotspots: true,
     showBusyPoints: true,
@@ -18,6 +19,12 @@ const DashboardPage = ({ user, onLogout }) => {
       ...prev,
       [name]: checked,
     }));
+  };
+
+  const handleNavigateToHighDemand = () => {
+    if (highDemandPoint) {
+      setNavigateToHighDemand(highDemandPoint); // Set navigation target to the closest high-demand point
+    }
   };
 
   return (
@@ -43,31 +50,37 @@ const DashboardPage = ({ user, onLogout }) => {
         </button>
       </div>
 
-      {/* Main Content Section */}
-      <div className="flex flex-col w-full max-w-6xl mx-auto mt-6">
-        {/* Accident Hotspot Notification Container */}
-        <div
-          className={`w-full p-4 rounded-lg shadow-md mb-6 ${
-            nearbyHotspots ? 'bg-red-500' : 'bg-green-500'
-          }`}
-        >
-          <h3 className="text-xl font-bold text-white">Accident Hotspots</h3>
-          <p className="text-white">
-            {nearbyHotspots
-              ? 'Accident Hotspot Nearby, Be Careful!'
-              : 'No Accident Hotspots Nearby!'}
-          </p>
+      {/* Notification Section */}
+      <div className="flex flex-row w-full max-w-6xl mx-auto mt-6 space-x-4">
+        <div className="w-1/2 p-4 rounded-lg shadow-md" style={{ backgroundColor: nearbyHotspots ? '#ffcccc' : '#ccffcc' }}>
+          <h3 className="text-lg font-bold">Accident Hotspots</h3>
+          <p>{nearbyHotspots ? 'Accident Hotspot Nearby, Be Careful!' : 'No Accident Hotspots Nearby!'}</p>
         </div>
 
-        <div className="w-full p-6 bg-white rounded-lg shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-primary">AI SmartMap</h3>
+        <div className="w-1/2 p-4 rounded-lg shadow-md" style={{ backgroundColor: highDemandPoint ? '#ffeb99' : '#e0e0e0' }}>
+          <h3 className="text-lg font-bold">High Demand Area</h3>
+          <div className="flex items-center justify-between">
+            <p>{highDemandPoint ? 'High Demand Area Nearby!' : 'No High Demand Area Nearby!'}</p>
+            {highDemandPoint && (
+              <button
+                onClick={handleNavigateToHighDemand}
+                className="px-5 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 transition duration-200 text-sm"
+              >
+                Go
+              </button>
+            )}
           </div>
-          <SmartMap
-            filterSettings={filterSettings}
-            onHotspotsNearbyChange={(isNearby) => setNearbyHotspots(isNearby)} // Pass the nearby status update function
-          />
         </div>
+      </div>
+
+      {/* Main Content Section */}
+      <div className="w-full max-w-6xl mx-auto mt-6">
+        <SmartMap
+          filterSettings={filterSettings}
+          onHotspotsNearbyChange={(nearby) => setNearbyHotspots(nearby)}
+          onHighDemandNearbyChange={(point) => setHighDemandPoint(point)}
+          navigateToHighDemand={navigateToHighDemand} // Pass the point to navigate to
+        />
       </div>
 
       {/* Filter Modal */}
@@ -76,41 +89,44 @@ const DashboardPage = ({ user, onLogout }) => {
           <div className="bg-white p-6 rounded-lg shadow-lg w-80">
             <h3 className="text-lg font-bold mb-4">Filter Map Markers</h3>
             <div className="mb-4">
-              <label>
+              <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   name="showAccidentHotspots"
                   checked={filterSettings.showAccidentHotspots}
                   onChange={handleFilterChange}
+                  className="form-checkbox"
                 />
-                Accident Hotspots
+                <span>Accident Hotspots</span>
               </label>
             </div>
             <div className="mb-4">
-              <label>
+              <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   name="showBusyPoints"
                   checked={filterSettings.showBusyPoints}
                   onChange={handleFilterChange}
+                  className="form-checkbox"
                 />
-                Busy Points
+                <span>Busy Points</span>
               </label>
             </div>
             <div className="mb-4">
-              <label>
+              <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   name="showTaxiStands"
                   checked={filterSettings.showTaxiStands}
                   onChange={handleFilterChange}
+                  className="form-checkbox"
                 />
-                Taxi Stands
+                <span>Taxi Stands</span>
               </label>
             </div>
             <button
               onClick={() => setShowModal(false)}
-              className="px-3 py-1 text-white bg-primary rounded hover:bg-blue-700 transition duration-200 text-sm"
+              className="px-3 py-1 text-white bg-primary rounded hover:bg-blue-700 transition duration-200 text-sm w-full mt-4"
             >
               Apply Filters
             </button>
