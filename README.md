@@ -7,7 +7,6 @@
 - [Features](#features)
 - [Value Proposition](#value-proposition)
 - [Technologies Used](#technologies-used)
-- [Architecture](#architecture)
 - [Hackathon Context](#hackathon-context)
 - [Future Enhancements](#future-enhancements)
 - [Installation](#installation)
@@ -16,8 +15,6 @@
   - [Frontend Setup](#frontend-setup)
 - [Running the Application](#running-the-application)
 - [Usage](#usage)
-- [Code Components](#code-components)
-  - [DashboardPage Component](#dashboardpage-component)
 - [API Endpoints](#api-endpoints)
   - [Authentication](#authentication)
   - [Data Retrieval](#data-retrieval)
@@ -34,7 +31,7 @@
 
 SmartMap is an AI-driven navigation and taxi management system designed to enhance taxi services in Dubai. Developed during the **Alibaba Cloud and RTA Hackathon**, SmartMap leverages machine learning algorithms to identify accident hotspots and high-demand areas, thereby improving safety and efficiency in taxi operations.
 
-Our team—**Mohammad Thabet**, **Mohamad Hamadeh**, **Adeeb Mohammed**, and **Homam Mourad**—under the supervision of **Dr. Said Elnaffar**, collaborated to create this innovative solution for smarter and safer taxi navigation in Dubai.
+Our team—**Homam Mourad**, **Mohammad Thabet**, **Mohamad Hamadeh**, and **Adeeb Mohammed**—under the supervision of **Dr. Said Elnaffar**, collaborated to create this innovative solution for smarter and safer taxi navigation in Dubai.
 
 ## Problems We Are Solving
 
@@ -84,12 +81,6 @@ By clustering demand areas and taxi stand usage patterns, the system dynamically
 - **Infrastructure**:
   - **Nginx**: Web server for serving the frontend application.
   - **Alibaba Cloud Services**: Hosting and deployment of the application.
-
-## Architecture
-
-![Architecture Diagram](path/to/architecture-diagram.png)
-
-*Note: An architecture diagram can be added here to illustrate the overall system design, including the frontend, backend, machine learning components, and how they interact.*
 
 ## Hackathon Context
 
@@ -161,7 +152,7 @@ Ensure you have the following installed on your system:
 
 3. **Update the DashboardPage Component**:
 
-   The `DashboardPage` component has been updated to include new features such as customizable map filters and real-time notifications. Ensure you have the latest code from the repository.
+   Ensure you have the latest code from the repository, which includes new features such as customizable map filters and real-time notifications.
 
 4. **Build the Frontend Application**:
 
@@ -212,170 +203,6 @@ Ensure you have the following installed on your system:
    - Click on the **Go** button to navigate to the closest high-demand point.
 
 *Note: Screenshots or a user guide can be added here to help users navigate the application more effectively.*
-
-## Code Components
-
-### DashboardPage Component
-
-The `DashboardPage` component is a key part of the frontend application, providing the main user interface for taxi drivers. It includes features such as real-time notifications, customizable filters, and an interactive map.
-
-#### Key Features:
-
-- **Real-Time Notifications**: Alerts drivers when they are near accident hotspots or high-demand areas.
-- **Customizable Filters**: Allows drivers to show or hide different types of markers on the map.
-- **Interactive Map Integration**: Embeds the `SmartMap` component, which displays the map with all the relevant data points.
-
-#### Code Snippet:
-
-```jsx
-import React, { useState } from 'react';
-import SmartMap from '../components/smartmap';
-
-const DashboardPage = ({ user, onLogout }) => {
-  const [nearbyHotspots, setNearbyHotspots] = useState(false);
-  const [highDemandPoint, setHighDemandPoint] = useState(null);
-  const [navigateToHighDemand, setNavigateToHighDemand] = useState(null);
-  const [filterSettings, setFilterSettings] = useState({
-    showAccidentHotspots: true,
-    showBusyPoints: true,
-    showTaxiStands: true,
-  });
-
-  const [showModal, setShowModal] = useState(false);
-
-  const handleFilterChange = (e) => {
-    const { name, checked } = e.target;
-    setFilterSettings((prev) => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
-
-  const handleNavigateToHighDemand = () => {
-    if (highDemandPoint) {
-      setNavigateToHighDemand(highDemandPoint);
-    }
-  };
-
-  return (
-    <div className="flex flex-col min-h-screen bg-gray-100 p-4">
-      {/* Header Section */}
-      <div className="flex items-center justify-between w-full max-w-6xl mx-auto">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-bold text-primary">
-            Hello, {user.firstName} {user.lastName}
-          </h2>
-          <button
-            onClick={onLogout}
-            className="px-3 py-1 text-white bg-primary rounded hover:bg-red-700 transition duration-200 text-sm"
-          >
-            Logout
-          </button>
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="px-3 py-1 text-white bg-primary rounded hover:bg-blue-700 transition duration-200 text-sm"
-        >
-          Filter
-        </button>
-      </div>
-
-      {/* Notification Section */}
-      <div className="flex flex-row w-full max-w-6xl mx-auto mt-6 space-x-4">
-        <div className="w-1/2 p-4 rounded-lg shadow-md" style={{ backgroundColor: nearbyHotspots ? '#ffcccc' : '#ccffcc' }}>
-          <h3 className="text-lg font-bold">Accident Hotspots</h3>
-          <p>{nearbyHotspots ? 'Accident Hotspot Nearby, Be Careful!' : 'No Accident Hotspots Nearby!'}</p>
-        </div>
-
-        <div className="w-1/2 p-4 rounded-lg shadow-md" style={{ backgroundColor: highDemandPoint ? '#ffeb99' : '#e0e0e0' }}>
-          <h3 className="text-lg font-bold">High Demand Area</h3>
-          <div className="flex items-center justify-between">
-            <p>{highDemandPoint ? 'High Demand Area Nearby!' : 'No High Demand Area Nearby!'}</p>
-            {highDemandPoint && (
-              <button
-                onClick={handleNavigateToHighDemand}
-                className="px-5 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 transition duration-200 text-sm"
-              >
-                Go
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Section */}
-      <div className="w-full max-w-6xl mx-auto mt-6">
-        <SmartMap
-          filterSettings={filterSettings}
-          onHotspotsNearbyChange={(nearby) => setNearbyHotspots(nearby)}
-          onHighDemandNearbyChange={(point) => setHighDemandPoint(point)}
-          navigateToHighDemand={navigateToHighDemand}
-        />
-      </div>
-
-      {/* Filter Modal */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-            <h3 className="text-lg font-bold mb-4">Filter Map Markers</h3>
-            <div className="mb-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="showAccidentHotspots"
-                  checked={filterSettings.showAccidentHotspots}
-                  onChange={handleFilterChange}
-                  className="form-checkbox"
-                />
-                <span>Accident Hotspots</span>
-              </label>
-            </div>
-            <div className="mb-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="showBusyPoints"
-                  checked={filterSettings.showBusyPoints}
-                  onChange={handleFilterChange}
-                  className="form-checkbox"
-                />
-                <span>Busy Points</span>
-              </label>
-            </div>
-            <div className="mb-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="showTaxiStands"
-                  checked={filterSettings.showTaxiStands}
-                  onChange={handleFilterChange}
-                  className="form-checkbox"
-                />
-                <span>Taxi Stands</span>
-              </label>
-            </div>
-            <button
-              onClick={() => setShowModal(false)}
-              className="px-3 py-1 text-white bg-primary rounded hover:bg-blue-700 transition duration-200 text-sm w-full mt-4"
-            >
-              Apply Filters
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default DashboardPage;
-```
-
-#### Explanation:
-
-- **Real-Time Data Handling**: The component uses state hooks to manage the visibility of nearby hotspots and high-demand areas.
-- **Filter Functionality**: Users can toggle the visibility of different map markers using a modal dialog.
-- **Navigation Feature**: Provides a "Go" button to navigate to the nearest high-demand area.
-- **Responsive Design**: Utilizes Tailwind CSS for styling to ensure the dashboard is responsive and user-friendly.
 
 ## API Endpoints
 
@@ -433,10 +260,10 @@ The following datasets were used in this project:
 
 ## Team Members
 
+- **Homam Mourad**
 - **Mohammad Thabet**
 - **Mohamad Hamadeh**
 - **Adeeb Mohammed**
-- **Homam Mourad**
 
 **Supervised by**: **Dr. Said Elnaffar**
 
@@ -493,6 +320,5 @@ This project is licensed under the [MIT License](LICENSE).
 ## Contact
 
 For any inquiries or support, please contact us at:
-
-- **Email**: smartmap.team@gmail.com
 - **GitHub Issues**: [Create an Issue](https://github.com/h0m4m/alibaba-rta-hackathon/issues)
+
