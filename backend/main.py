@@ -18,7 +18,11 @@ app = FastAPI()
 
 # Adding CORS middleware to allow requests from React frontend
 origins = [
-    "http://localhost:3000",  # Frontend URL
+    "http://localhost:3000",    # Development frontend
+    "http://smartmap.cc",       # Production frontend
+    "https://smartmap.cc",      # If using HTTPS
+    "http://www.smartmap.cc",   # Include 'www' subdomain
+    "https://www.smartmap.cc",
 ]
 
 app.add_middleware(
@@ -28,6 +32,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # SQLAlchemy Models
 class User(Base):
