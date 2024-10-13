@@ -3,6 +3,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Demo Video](#demo-video)
 - [Problems We Are Solving](#problems-we-are-solving)
 - [Features](#features)
 - [Value Proposition](#value-proposition)
@@ -32,6 +33,8 @@
 SmartMap is an AI-driven navigation and taxi management system designed to enhance taxi services in Dubai. Developed during the **Alibaba Cloud and RTA Hackathon**, SmartMap leverages machine learning algorithms to identify accident hotspots and high-demand areas, thereby improving safety and efficiency in taxi operations.
 
 Our team—**Homam Mourad**, **Mohammad Thabet**, **Mohamad Hamadeh**, and **Adeeb Mohammed**—under the supervision of **Dr. Said Elnaffar**, collaborated to create this innovative solution for smarter and safer taxi navigation in Dubai.
+## Demo Video
+[![SmartMap Demo Video]](https://github.com/user-attachments/assets/6cdecac6-98f6-49d8-adf5-4fc14eddb157)
 
 ## Problems We Are Solving
 
