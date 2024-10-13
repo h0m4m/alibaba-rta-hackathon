@@ -36,6 +36,7 @@ Our team— [*Homam Mourad*](https://github.com/h0m4m)
 , [*Mohammad Thabet*](https://github.com/MohammadThabetHassan)
 , [*Mohamad Hamadeh*](https://github.com/YasserCoconut)
 , and [*Adeeb Mohammed*](https://github.com/AdeebMo)
+
 —under the supervision of **Dr. Said Elnaffar**, collaborated to create this innovative solution for smarter and safer taxi navigation in Dubai.
 ## Demo Video
 [![SmartMap Demo Video]](https://github.com/user-attachments/assets/6cdecac6-98f6-49d8-adf5-4fc14eddb157)
@@ -268,7 +269,7 @@ The following datasets were used in this project:
 ## Team Members
 - [*Homam Mourad*](https://github.com/h0m4m)
 - [*Mohammad Thabet*](https://github.com/MohammadThabetHassan)
-- [*Mohamad Hamadeh*](https://github.com/YasserCoconut_
+- [*Mohamad Hamadeh*](https://github.com/YasserCoconut)
 - [*Adeeb Mohammed*](https://github.com/AdeebMo)
 
 **Supervised by**: **Dr. Said Elnaffar**
