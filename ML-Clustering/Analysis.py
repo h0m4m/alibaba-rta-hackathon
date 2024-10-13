@@ -4,8 +4,8 @@ from sklearn.metrics.pairwise import haversine_distances
 from math import radians
 
 # Load the datasets
-original_data = pd.read_csv('anonymized-taxi-data.csv')
-clustered_data = pd.read_csv('high-demand-areas-reduced.csv')
+original_data = pd.read_csv('ML-Clustering\\anonymized-taxi-data.csv')
+clustered_data = pd.read_csv('ML-Clustering\\high-demand-areas-reduced.csv')
 
 # Function to calculate haversine distance
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -43,7 +43,7 @@ def process_new_data(original_df, clustered_df):
             potential_starts = clustered_df[clustered_df['hour'] == next_hour]
             distances = potential_starts.apply(lambda row: haversine_distance(end_lat, end_lon, row['StartLat'], row['StartLon']), axis=1)
             
-            if (distances <= 0.5).any():
+            if (distances <= 0.52).any():
                 total_wait_time += 5  # 5 minutes wait time if within 0.5km radius (around 2 to 3 km distance)
             else:
                 time_diff = (group.iloc[i+1]['StartDateTime'] - group.iloc[i]['StartDateTime']).total_seconds() / 60
@@ -58,10 +58,10 @@ def process_new_data(original_df, clustered_df):
 
 
 old_wait_times = process_original_data(original_data)
-old_wait_times.to_csv('old-data-wt.csv', index=False)
+old_wait_times.to_csv('ML-Clustering\\old-data-wt.csv', index=False)
 
 new_wait_times = process_new_data(original_data, clustered_data)
-new_wait_times.to_csv('new-data-wt.csv', index=False)
+new_wait_times.to_csv('ML-Clustering\\new-data-wt.csv', index=False)
 
 # Calculate time saved and potential taxi reduction
 old_avg_wait = old_wait_times['avg_wait_time'].mean()
@@ -74,5 +74,8 @@ new_total_time = total_trip_time + new_wait_times['avg_wait_time'].sum()
 
 potential_reduction = (1 - new_total_time / old_total_time) * 100
 
-print(f"Average time saved per trip: {time_saved:.2f} minutes")
+
+print(f"Average wait time for old data: {old_avg_wait:.2f} minutes")
+print(f"Average wait time for new data: {new_avg_wait:.2f} minutes")
+print(f"Average time saved in between trips: {time_saved:.2f} minutes")
 print(f"Potential taxi reduction: {potential_reduction:.2f}%")
