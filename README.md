@@ -1,4 +1,3 @@
-
 # SmartMap - AI-Powered Taxi Management System for Dubai
 
 ## Table of Contents
@@ -17,6 +16,8 @@
   - [Frontend Setup](#frontend-setup)
 - [Running the Application](#running-the-application)
 - [Usage](#usage)
+- [Code Components](#code-components)
+  - [DashboardPage Component](#dashboardpage-component)
 - [API Endpoints](#api-endpoints)
   - [Authentication](#authentication)
   - [Data Retrieval](#data-retrieval)
@@ -46,7 +47,8 @@ Our team—**Mohammad Thabet**, **Mohamad Hamadeh**, **Adeeb Mohammed**, and **H
 - **Accident Hotspot Identification**: Utilizes KMeans clustering to detect accident-prone areas, enabling proactive safety measures.
 - **Dynamic Taxi Dispatching**: Offers real-time insights into taxi stand locations and high-demand areas to optimize taxi availability and reduce idle time.
 - **AI-Driven Interactive Map**: Provides taxi drivers with an interactive map that leverages real-time data and AI-driven insights for efficient navigation.
-- **Comprehensive Data Analytics**: Processes large datasets, including anonymized taxi data and traffic incidents, to inform smarter decision-making.
+- **Customizable Map Filters**: Allows drivers to filter map markers based on their preferences (e.g., accident hotspots, busy points, taxi stands).
+- **Real-Time Notifications**: Alerts drivers when they are near accident hotspots or high-demand areas.
 - **Driver Focus Monitoring**: Future integration with camera systems will track driver distractions and improve safety.
 
 ## Value Proposition
@@ -68,7 +70,7 @@ By clustering demand areas and taxi stand usage patterns, the system dynamically
 - **Frontend**:
   - **React.js**: For building a responsive and dynamic user interface.
   - **Tailwind CSS**: For styling and designing the UI components.
-  - **JavaScript**: Core programming language for frontend logic.
+  - **JavaScript (ES6+)**: Core programming language for frontend logic.
   - **Axios**: For handling API requests and integration.
 
 - **Backend**:
@@ -157,13 +159,17 @@ Ensure you have the following installed on your system:
    npm install
    ```
 
-3. **Build the Frontend Application**:
+3. **Update the DashboardPage Component**:
+
+   The `DashboardPage` component has been updated to include new features such as customizable map filters and real-time notifications. Ensure you have the latest code from the repository.
+
+4. **Build the Frontend Application**:
 
    ```bash
    npm run build
    ```
 
-4. **Deploy the Frontend with Nginx**:
+5. **Deploy the Frontend with Nginx**:
 
    - **Copy Build Files to Nginx Directory**:
 
@@ -188,11 +194,188 @@ Ensure you have the following installed on your system:
 
 2. **Login or Sign Up**: Use the authentication endpoints or the frontend UI to create an account or log in.
 
-3. **Navigate the Map**: Utilize the interactive map to view accident hotspots, high-demand areas, and taxi stand locations.
+3. **Navigate the Dashboard**: After logging in, you'll be directed to the dashboard where you can:
 
-4. **Plan Routes**: Use the insights provided to plan safer and more efficient routes.
+   - View real-time notifications about nearby accident hotspots and high-demand areas.
+   - Customize map filters to display or hide accident hotspots, busy points, and taxi stands.
+   - Use the interactive map to plan safer and more efficient routes.
+
+4. **Filter Map Markers**:
+
+   - Click on the **Filter** button to open the filter modal.
+   - Select or deselect the markers you wish to display on the map.
+   - Apply the filters to update the map in real-time.
+
+5. **Navigate to High-Demand Areas**:
+
+   - If a high-demand area is nearby, you'll receive a notification.
+   - Click on the **Go** button to navigate to the closest high-demand point.
 
 *Note: Screenshots or a user guide can be added here to help users navigate the application more effectively.*
+
+## Code Components
+
+### DashboardPage Component
+
+The `DashboardPage` component is a key part of the frontend application, providing the main user interface for taxi drivers. It includes features such as real-time notifications, customizable filters, and an interactive map.
+
+#### Key Features:
+
+- **Real-Time Notifications**: Alerts drivers when they are near accident hotspots or high-demand areas.
+- **Customizable Filters**: Allows drivers to show or hide different types of markers on the map.
+- **Interactive Map Integration**: Embeds the `SmartMap` component, which displays the map with all the relevant data points.
+
+#### Code Snippet:
+
+```jsx
+import React, { useState } from 'react';
+import SmartMap from '../components/smartmap';
+
+const DashboardPage = ({ user, onLogout }) => {
+  const [nearbyHotspots, setNearbyHotspots] = useState(false);
+  const [highDemandPoint, setHighDemandPoint] = useState(null);
+  const [navigateToHighDemand, setNavigateToHighDemand] = useState(null);
+  const [filterSettings, setFilterSettings] = useState({
+    showAccidentHotspots: true,
+    showBusyPoints: true,
+    showTaxiStands: true,
+  });
+
+  const [showModal, setShowModal] = useState(false);
+
+  const handleFilterChange = (e) => {
+    const { name, checked } = e.target;
+    setFilterSettings((prev) => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
+  const handleNavigateToHighDemand = () => {
+    if (highDemandPoint) {
+      setNavigateToHighDemand(highDemandPoint);
+    }
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen bg-gray-100 p-4">
+      {/* Header Section */}
+      <div className="flex items-center justify-between w-full max-w-6xl mx-auto">
+        <div className="flex items-center space-x-4">
+          <h2 className="text-xl font-bold text-primary">
+            Hello, {user.firstName} {user.lastName}
+          </h2>
+          <button
+            onClick={onLogout}
+            className="px-3 py-1 text-white bg-primary rounded hover:bg-red-700 transition duration-200 text-sm"
+          >
+            Logout
+          </button>
+        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="px-3 py-1 text-white bg-primary rounded hover:bg-blue-700 transition duration-200 text-sm"
+        >
+          Filter
+        </button>
+      </div>
+
+      {/* Notification Section */}
+      <div className="flex flex-row w-full max-w-6xl mx-auto mt-6 space-x-4">
+        <div className="w-1/2 p-4 rounded-lg shadow-md" style={{ backgroundColor: nearbyHotspots ? '#ffcccc' : '#ccffcc' }}>
+          <h3 className="text-lg font-bold">Accident Hotspots</h3>
+          <p>{nearbyHotspots ? 'Accident Hotspot Nearby, Be Careful!' : 'No Accident Hotspots Nearby!'}</p>
+        </div>
+
+        <div className="w-1/2 p-4 rounded-lg shadow-md" style={{ backgroundColor: highDemandPoint ? '#ffeb99' : '#e0e0e0' }}>
+          <h3 className="text-lg font-bold">High Demand Area</h3>
+          <div className="flex items-center justify-between">
+            <p>{highDemandPoint ? 'High Demand Area Nearby!' : 'No High Demand Area Nearby!'}</p>
+            {highDemandPoint && (
+              <button
+                onClick={handleNavigateToHighDemand}
+                className="px-5 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 transition duration-200 text-sm"
+              >
+                Go
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Section */}
+      <div className="w-full max-w-6xl mx-auto mt-6">
+        <SmartMap
+          filterSettings={filterSettings}
+          onHotspotsNearbyChange={(nearby) => setNearbyHotspots(nearby)}
+          onHighDemandNearbyChange={(point) => setHighDemandPoint(point)}
+          navigateToHighDemand={navigateToHighDemand}
+        />
+      </div>
+
+      {/* Filter Modal */}
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h3 className="text-lg font-bold mb-4">Filter Map Markers</h3>
+            <div className="mb-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="showAccidentHotspots"
+                  checked={filterSettings.showAccidentHotspots}
+                  onChange={handleFilterChange}
+                  className="form-checkbox"
+                />
+                <span>Accident Hotspots</span>
+              </label>
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="showBusyPoints"
+                  checked={filterSettings.showBusyPoints}
+                  onChange={handleFilterChange}
+                  className="form-checkbox"
+                />
+                <span>Busy Points</span>
+              </label>
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="showTaxiStands"
+                  checked={filterSettings.showTaxiStands}
+                  onChange={handleFilterChange}
+                  className="form-checkbox"
+                />
+                <span>Taxi Stands</span>
+              </label>
+            </div>
+            <button
+              onClick={() => setShowModal(false)}
+              className="px-3 py-1 text-white bg-primary rounded hover:bg-blue-700 transition duration-200 text-sm w-full mt-4"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default DashboardPage;
+```
+
+#### Explanation:
+
+- **Real-Time Data Handling**: The component uses state hooks to manage the visibility of nearby hotspots and high-demand areas.
+- **Filter Functionality**: Users can toggle the visibility of different map markers using a modal dialog.
+- **Navigation Feature**: Provides a "Go" button to navigate to the nearest high-demand area.
+- **Responsive Design**: Utilizes Tailwind CSS for styling to ensure the dashboard is responsive and user-friendly.
 
 ## API Endpoints
 
