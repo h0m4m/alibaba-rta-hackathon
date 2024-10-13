@@ -32,7 +32,12 @@
 
 SmartMap is an AI-driven navigation and taxi management system designed to enhance taxi services in Dubai. Developed during the **Alibaba Cloud and RTA Hackathon**, SmartMap leverages machine learning algorithms to identify accident hotspots and high-demand areas, thereby improving safety and efficiency in taxi operations.
 
-Our team—**Homam Mourad**, **Mohammad Thabet**, **Mohamad Hamadeh**, and **Adeeb Mohammed**—under the supervision of **Dr. Said Elnaffar**, collaborated to create this innovative solution for smarter and safer taxi navigation in Dubai.
+Our team—  [*Homam Mourad*](https://github.com/h0m4m)
+, [*Mohammad Thabet*](https://github.com/MohammadThabetHassan)
+, [*Mohamad Hamadeh*](https://github.com/YasserCoconut)
+, and [*Adeeb Mohammed*](https://github.com/AdeebMo)
+
+— under the supervision of **Dr. Said Elnaffar**, collaborated to create this innovative solution for smarter and safer taxi navigation in Dubai.
 ## Demo Video
 [![SmartMap Demo Video]](https://github.com/user-attachments/assets/6cdecac6-98f6-49d8-adf5-4fc14eddb157)
 
@@ -262,11 +267,10 @@ The following datasets were used in this project:
 *Note: Due to privacy and licensing restrictions, the datasets are not included in this repository.*
 
 ## Team Members
-
-- **Homam Mourad**
-- **Mohammad Thabet**
-- **Mohamad Hamadeh**
-- **Adeeb Mohammed**
+- [*Homam Mourad*](https://github.com/h0m4m)
+- [*Mohammad Thabet*](https://github.com/MohammadThabetHassan)
+- [*Mohamad Hamadeh*](https://github.com/YasserCoconut)
+- [*Adeeb Mohammed*](https://github.com/AdeebMo)
 
 **Supervised by**: **Dr. Said Elnaffar**
 
