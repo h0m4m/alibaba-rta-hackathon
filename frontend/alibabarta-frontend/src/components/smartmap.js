@@ -9,6 +9,7 @@ import {
 } from '@react-google-maps/api';
 
 const RADIUS_KM = 2; // Radius in kilometers to consider the point as served by a driver
+const ORPHAN_RADIUS_KM = 5; // Radius in kilometers to determine if a busy point is an orphan
 
 const containerStyle = {
   width: '100%',
@@ -33,10 +34,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/accident-hotspots')
       .then((response) => response.json())
-      .then((data) => {
-        setAccidentData(data);
-        console.log('Accident data:', data);
-      })
+      .then((data) => setAccidentData(data))
       .catch((error) => console.error('Error fetching accident hotspots:', error));
   }, []);
 
@@ -44,10 +42,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/busy-points')
       .then((response) => response.json())
-      .then((data) => {
-        setBusyPoints(data);
-        console.log('Busy points fetched:', data);
-      })
+      .then((data) => setBusyPoints(data))
       .catch((error) => console.error('Error fetching busy points:', error));
   }, []);
 
@@ -55,10 +50,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/taxi-stands')
       .then((response) => response.json())
-      .then((data) => {
-        setTaxiStands(data);
-        console.log('Taxi stands fetched:', data);
-      })
+      .then((data) => setTaxiStands(data))
       .catch((error) => console.error('Error fetching taxi stands:', error));
   }, []);
 
@@ -80,6 +72,29 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
 
     return R * c; // Distance in kilometers
   };
+
+  // Mark orphan busy points that do not have a taxi stand within 5 km
+  useEffect(() => {
+    if (busyPoints.length > 0 && taxiStands.length > 0) {
+      const updatedPoints = busyPoints.map((point) => {
+        const isOrphan = !taxiStands.some((stand) => {
+          const distance = haversineDistance(
+            { lat: point.start_lat, lng: point.start_lon },
+            { lat: stand.location_latitude, lng: stand.location_longitude }
+          );
+          return distance <= ORPHAN_RADIUS_KM;
+        });
+        return { ...point, isOrphan };
+      });
+
+      setBusyPoints((prevPoints) => {
+        if (JSON.stringify(prevPoints) !== JSON.stringify(updatedPoints)) {
+          return updatedPoints; // Only update state if there's an actual change
+        }
+        return prevPoints; // Prevent unnecessary updates
+      });
+    }
+  }, [taxiStands]);
 
   // Check if any accident hotspots are nearby
   useEffect(() => {
@@ -151,7 +166,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
       {filterSettings.showAccidentHotspots &&
         accidentData.map((hotspot, index) => (
           <Marker
-            key={index}
+            key={`accident-${index}`}
             position={{ lat: hotspot.acci_x, lng: hotspot.acci_y }}
             icon={{
               url: '/icons/accidentmarker.png',
@@ -165,10 +180,10 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
       {filterSettings.showBusyPoints &&
         busyPoints.map((point, index) => (
           <Marker
-            key={index}
+            key={`busy-${index}`}
             position={{ lat: point.start_lat, lng: point.start_lon }}
             icon={{
-              url: '/icons/busypointmarker.png',
+              url: point.isOrphan ? '/icons/purplebusypointmarker.png' : '/icons/busypointmarker.png',
               scaledSize: new window.google.maps.Size(41, 41),
             }}
             onClick={() =>
@@ -185,7 +200,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
       {filterSettings.showTaxiStands &&
         taxiStands.map((stand, index) => (
           <Marker
-            key={index}
+            key={`taxi-${index}`}
             position={{ lat: stand.location_latitude, lng: stand.location_longitude }}
             icon={{
               url: '/icons/taxistand.png',
