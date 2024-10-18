@@ -65,3 +65,5 @@ yarn-error.log*
 # Testing outputs
 coverage/
 *.pytest_cache
+
+/ML-Clustering/anonymized-taxi-data.csv
