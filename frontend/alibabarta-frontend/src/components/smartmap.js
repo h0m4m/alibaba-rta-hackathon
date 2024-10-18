@@ -27,7 +27,7 @@ const SmartMap = ({ filterSettings, onHotspotsNearbyChange, onHighDemandNearbyCh
   // Load Google Maps JavaScript API
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: 'AIzaSyDf70_Bz0_oFp0tJicfzhbFWa70emn1ElM', // Your Google Maps API Key
+    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY, // Your Google Maps API Key
   });
 
   // Fetch accident data from the FastAPI backend
